@@ -1,72 +1,30 @@
 # Lost Letters
 #
 # Problem:
-# Put the tiles together into sets of 3 to form 5 English words. However,
-# 2 of the tiles are red herrings, which 2?
+# Put the tiles together into sets of three to form five English words. However,
+# two of the tiles are red herrings, which two?
 #
 # Solution:
+# This is difficult to do all by computer, but we can make a list of words that is easy to 
+# manually inspect.
 #
+# Use a web scraper to get a list of words that start and end with each tile. Go through
+# this list and filter out the words that contain sequences that do not match our tiles.
+# From this list we can then manually figure out the answer.
+#
+# The web scraper is a separate program to make debugging easier.
 
-import urllib.request
-import urllib.parse
 import re
 import sys
 import os
 
-#### First, scape for words 9 letters or less starting and ending
-#### with all combox of tiles.  Put in a file for later processing.
-
-##wordfile = open('D:\Programming\lostletters.txt','w')
-##tiles = ("ble", "and", "eni", "po", "rm", "in", "ss", "kst", "gen",
-##         "mi", "ing", "ign", "ac", "ant", "ta", "ous", "sh")
-##
-### Make a list of words and store for later
-##for starttile in tiles:
-##    for endtile in tiles:
-##        if (starttile != endtile):
-##            url = "http://design215.com/toolbox/wordfind.php"
-##
-##            values = {}
-##            values['fsize'] = "9"
-##            values['check2'] = "on"
-##            values['fstart'] = starttile
-##            values['fend'] = endtile
-##            values['fcontain'] = ""
-##            values['fscramble'] = ""
-##            values['rad1'] = "w1"
-##            values['dx'] = "Volvox Webscraper/1.0; Python 3.0"
-##            data = urllib.parse.urlencode(values)
-##
-##            headers = {}
-##            headers['User-Agent'] = "Volvox Webscraper/1.0; Python 3.0"
-##            headers['Host'] = "design215.com"
-##            headers['Content-Type'] = "application/x-www-form-urlencoded"
-##            
-##            # Open the word page
-##            print ("Getting words starting with \"{0}\" and ending in \"{1}\"...".format(starttile, endtile))
-##            req = urllib.request.Request(url, data, headers)
-##            response = urllib.request.urlopen(req)
-##            data = str(response.read()).replace("\\n","\n")
-##
-##            # Grab any sub page links
-##            datasplit = data.split("\n")
-##            for line in datasplit:
-##                #print(line)
-##                linematchobj = re.finditer(starttile + '[a-zA-Z]{2,3}' + endtile, line)
-##               
-##                if linematchobj:
-##                    for match in linematchobj:
-##                        print(match.group())
-##                        wordfile.write(match.group() + "\n")
-##                    
-##wordfile.close()    
-
-## Go through the word list and regex out bad words
-wordfile = open('lostletters.txt', 'r')
+# Go through the word list and regex out bad words.
+wordfile = open('.\lostletters.txt', 'r')
 
 print("Processing...");
 for line in wordfile:
-    #print(line)
+    
+    # A bad word is one that does not contain sequences from three tiles
     linematchobj = re.match("(ble|and|eni|po|rm|in|ss|kst|mi|ing|ign|ac|ant|ta|ous|sh|gen){3}", line)
 
     if linematchobj:
