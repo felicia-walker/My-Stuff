@@ -24,15 +24,6 @@ public class PentominoTest
     @BeforeClass
     public static void oneTimeSetUp()
     {
-        // Initialize the board
-        for (int i = 0; i < BOARD_ROWS; i++)
-        {
-            for (int j = 0; j < BOARD_COLS; j++)
-            {
-                board.setValue(i, j, '.');
-            }
-        }
-
         // Initialize the pentominos
         pentominos.put("i", new Polyomino('i', "xxxxx", 1, 5, true, true));
         pentominos.put("x", new Polyomino('x', ".x.xxx.x.", 3, 3, true, true));

@@ -3,9 +3,9 @@ package pxc.util.polyominos;
 public class Board implements Cloneable
 {
 
-    private int     numrows = 0;
-    private int     numcols = 0;
-    private int[][] board;
+    private int      numrows = 0;
+    private int      numcols = 0;
+    private char[][] board;
 
     // Constructors -----------------------------------------------
     public Board()
@@ -17,14 +17,14 @@ public class Board implements Cloneable
     {
         this.numrows = rows;
         this.numcols = cols;
-        this.board = new int[rows][cols];
+        this.board = new char[rows][cols];
 
         // Initialize the board
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < cols; j++)
             {
-                board[i][j] = 0;
+                board[i][j] = '.';
             }
         }
     }
@@ -45,22 +45,22 @@ public class Board implements Cloneable
     }
 
     // Getters and setters -------------------------------------------------------------
-    public void setValue(int row, int col, int value)
+    public void setValue(int row, int col, char value)
     {
         board[row][col] = value;
     }
 
-    public int getValue(int row, int col)
+    public char getValue(int row, int col)
     {
         return board[row][col];
     }
 
-    public int rowLength()
+    public int numRows()
     {
         return numrows;
     }
 
-    public int columnLength()
+    public int numCols()
     {
         return numcols;
     }
@@ -95,12 +95,12 @@ public class Board implements Cloneable
         {
             for (int j = 0; j < numcols; j++)
             {
-                System.out.print(Integer.toString(board[i][j]) + ' ');
+                System.out.print(board[i][j] + ' ');
             }
-            
+
             System.out.println();
         }
-        
+
         System.out.println("-----");
     }
 }

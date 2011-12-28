@@ -8,15 +8,14 @@ public class Polyomino
     private static final char BLANK            = '.';
     private static final char SHAPE            = 'x';
 
-    //private int               numrows          = 0;
-    //private int               numcols          = 0;
     private Shape             shape;
     private Shape             orig_shape;
-    private char              symbol           = 'A';
     private ArrayList<Shape>  all_orientations = new ArrayList<Shape>();
+    
     private boolean           doflip           = false;
     private boolean           dorotate         = false;
     private boolean           lastCollision    = false;
+    private char              symbol           = 'A';
 
     // Enums ------------------------------------------------------
     public enum Orientation
@@ -38,9 +37,8 @@ public class Polyomino
     public Polyomino(char symbol, String shape, int numrows, int numcols, Orientation direction, boolean dorotate,
             boolean doflip)
     {
-
-        this.symbol = symbol;
         this.shape = new Shape(numrows, numcols);
+        this.symbol = symbol;
         this.dorotate = dorotate;
         this.doflip = doflip;
 
@@ -50,7 +48,7 @@ public class Polyomino
         {
             for (int j = 0; j < numcols; j++)
             {
-                this.shape.setItem(i, j, ((shape.charAt(index) == SHAPE) ? symbol : BLANK));
+                this.shape.data[i][j] = (shape.charAt(index) == SHAPE) ? symbol : BLANK;
                 index++;
             }
         }
@@ -76,19 +74,19 @@ public class Polyomino
 
     public int getNumRows()
     {
-        return shape.getNumRows();
+        return orig_shape.numrows;
     }
 
     public int getNumCols()
     {
-        return shape.getNumCols();
+        return orig_shape.numcols;
     }
 
     public Shape getShape()
     {
         return shape;
     }
-    
+
     public String deepToString()
     {
         return Arrays.deepToString(shape.data);
@@ -132,17 +130,17 @@ public class Polyomino
         Board tmpBoard = board.clone();
 
         // Iterate over the shape
-        for (int i = 0; i < shape.getNumRows(); i++)
+        for (int i = 0; i < shape.numrows; i++)
         {
-            for (int j = 0; j < shape.getNumCols(); j++)
+            for (int j = 0; j < shape.numcols; j++)
             {
                 // If there is part of the shape, see if it can be put in the board.
                 // If not, sound a collision
-                if (shape.getItem(i, j) == symbol)
+                if (shape.data[i][j] == symbol)
                 {
 
                     // Will it go out of bounds?
-                    if ((row + i > board.rowLength() - 1) || (col + j > board.columnLength() - 1))
+                    if ((row + i > board.numRows() - 1) || (col + j > board.numCols() - 1))
                     {
                         collision = true;
                         break;
@@ -180,7 +178,8 @@ public class Polyomino
     {
         for (Orientation direction : Orientation.values())
         {
-            Shape tmpShape = null;
+            Shape tmpShape = shape.clone();
+
             switch (direction)
             {
             case normal90:
@@ -234,7 +233,7 @@ public class Polyomino
 
             case normal:
             default:
-                tmpShape = shape.clone();
+                // Already done in initalization
             }
 
             all_orientations.add(tmpShape.clone());
@@ -251,7 +250,7 @@ public class Polyomino
         {
             for (int j = 0; j < collength; j++)
             {
-                tmpShape.setItem(i, collength - j - 1, origShape.getItem(i,  j));
+                tmpShape.data[i][collength - j - 1] = origShape.data[i][j];
             }
         }
 
@@ -262,8 +261,8 @@ public class Polyomino
     {
         Shape tmpShape;
         Shape finalShape = origShape.clone();
-        int numrows = origShape.rowLength();
-        int numcols = origShape.colLength();
+        int numrows = origShape.numrows;
+        int numcols = origShape.numcols;
 
         for (int k = 0; k < iterations; k++)
         {
@@ -273,20 +272,21 @@ public class Polyomino
             {
                 for (int j = numcols - 1; j >= 0; j--)
                 {
-                    tmpShape.setItem(numcols - j - 1, i, finalShape.getItem(i, j));
+                    tmpShape.data[numcols - j - 1][i] = finalShape.data[i][j];
                 }
             }
 
-            numrows = tmpShape.getNumRows();
-            numcols = tmpShape.getNumCols();
-            
+            numrows = tmpShape.numrows;
+            numcols = tmpShape.numcols;
+
             finalShape = tmpShape.clone();
         }
 
         return finalShape;
     }
 
-    private class Shape
+    // Inner classes -----------------------------------------------
+    class Shape
     {
         private char[][] data;
         private int      numrows = 0;
@@ -296,44 +296,15 @@ public class Polyomino
         {
             this.numrows = numrows;
             this.numcols = numcols;
+
             this.data = new char[numrows][numcols];
         }
 
-        public int getNumRows()
-        {
-            return numrows;
-        }
-
-        public int getNumCols()
-        {
-            return numcols;
-        }
-
-        public void setItem(final int rowindex, final int colindex, final char value)
-        {
-            data[rowindex][colindex] = value;
-        }
-
-        public char getItem(final int rowindex, final int colindex)
-        {
-            return data[rowindex][colindex];
-        }
-        
-        public int rowLength()
-        {
-            return data.length;
-        }
-        
-        public int colLength()
-        {
-            return data[0].length;
-        }
-        
         public boolean isEmtpy()
         {
             return rowLength() == 0 && colLength() == 0;
         }
-        
+
         public Shape clone()
         {
             if (rowLength() == 0)
@@ -346,12 +317,21 @@ public class Polyomino
             {
                 for (int j = 0; j < numcols; j++)
                 {
-                    result.setItem(i,  j, data[i][j]);
+                    result.data[i][j] = data[i][j];
                 }
             }
 
             return result;
         }
 
+        private int rowLength()
+        {
+            return data.length;
+        }
+
+        private int colLength()
+        {
+            return data[0].length;
+        }
     }
 }
