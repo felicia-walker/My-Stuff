@@ -2,7 +2,6 @@ package pxc.puzzles;
 
 import pxc.util.polyominos.Board;
 import pxc.util.polyominos.Polyomino;
-import pxc.util.polyominos.Polyomino.*;
 
 public class Misshaps {
 	
@@ -12,9 +11,8 @@ public class Misshaps {
 	private static final int POLYOMINO_SIZE = 6;
 
 	private static Board board;
-	private static int count = 0;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws CloneNotSupportedException {
 		
 		// Try different rectangle sizes based on number of polyominoes across and down
 		for (int num_across = 1; num_across < MAX_ACROSS; num_across++) {
@@ -28,15 +26,15 @@ public class Misshaps {
 					System.out.println("Trying rectangle of size " + num_across + "x" + num_down);
 					
 					Polyomino hexomino1 = new Polyomino('a',"xxxxx.x...", 2, 5, false, false);
-					Polyomino hexomino2 = new Polyomino('b',"xxxxx.x...", 2, 5, 
-							Polyomino.Orientation.flip90, false, false);
+					@SuppressWarnings("unused")
+                    Polyomino hexomino2 = new Polyomino('b',"xxxxx.x...", 2, 5, Polyomino.Orientation.flip90, false, false);
 					board = new Board(width, height);
 					
 					
 					board = hexomino1.placeAt(board, 0, 0);
 					//board = hexomino2.placeAt(board, 1, 0);
 					
-					board.printBoardChar();
+					board.printBoard();
 				}
 			}
 		}

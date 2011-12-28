@@ -13,7 +13,8 @@ public class Board {
 	private char[][] m_board;
 	private char[][] m_boardOriginal;
 	private Point m_boardMaxValues;
-	private int m_moveNum = 0;
+	@SuppressWarnings("unused")
+    private int m_moveNum = 0;
 
 	// Constructors ----------------------------------------------------------
 	Board(String filename) {

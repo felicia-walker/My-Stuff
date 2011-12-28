@@ -95,7 +95,7 @@ public class Board implements Cloneable
         {
             for (int j = 0; j < numcols; j++)
             {
-                System.out.print(board[i][j] + ' ');
+                System.out.print(board[i][j] + " ");
             }
 
             System.out.println();
