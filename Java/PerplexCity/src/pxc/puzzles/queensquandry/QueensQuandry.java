@@ -11,6 +11,5 @@ public class QueensQuandry {
 		System.out.println(g_FinalBoard.numQueens());
 		g_FinalBoard.printBoard();	
 		System.out.println();
-
 	}
 }
