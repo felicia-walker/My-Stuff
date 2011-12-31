@@ -1,21 +1,25 @@
 package pxc.puzzles;
 
+/**
+ * This program takes a chess board of a given size and figures out the maximum number of queens that can be placed such
+ * that no queen can attack another. It also prints out the board for this solution.
+ */
 public class QueensQuandry
 {
-    private static final char BLANK      = '.';
-    private static final char LINE       = 'x';
-    private static final char QUEEN      = 'Q';
-    private static final int  BOARD_SIZE = 8;
+    private static final char   BLANK      = '.';
+    private static final char   LINE       = 'x';
+    private static final char   QUEEN      = 'Q';
+    private static final int    BOARD_SIZE = 8;
 
-    private static boolean    doneFlag   = false;
+    private static boolean      doneFlag   = false;
+    public static QueensQuandry finalboard = null;
 
-    public static QueensQuandry       finalboard = null;
-    private char[][]          board      = new char[BOARD_SIZE][BOARD_SIZE];
-    private int               numQueens  = 0;
+    private char[][]            board      = new char[BOARD_SIZE][BOARD_SIZE];
+    private int                 numQueens  = 0;
 
     // Constructors ----------------------------------------------------
     /**
-     * Create a blank board
+     * Create a blank board by iterating over the 2d array and filling with blank characters.
      */
     public QueensQuandry()
     {
@@ -29,7 +33,7 @@ public class QueensQuandry
     }
 
     /**
-     * Create a new board that is a copy of an existing board
+     * Create a new board that is a copy of an existing board. This includes the number of queens placed so far.
      * 
      * @param board
      *            The board to copy
@@ -154,6 +158,11 @@ public class QueensQuandry
         return ret_val;
     }
 
+    /**
+     * For the current board iterate over all empty cells and place queens in them. When a queen is placed, iterate over
+     * that new board. This continues until a board is full or the maximum number of queens is placed. This will be the
+     * same as the board since since two queens cannot be in the same column.
+     */
     public void iterate()
     {
         // Don't bother if the board is full or we have found a solution
@@ -162,6 +171,7 @@ public class QueensQuandry
             return;
         }
 
+        // Iterate over the board cell by cell
         for (int rowindex = 0; rowindex < BOARD_SIZE; rowindex++)
         {
             for (int colindex = 0; colindex < BOARD_SIZE; colindex++)
@@ -170,8 +180,7 @@ public class QueensQuandry
                 // starting with
                 if (numQueens == 0)
                 {
-                    System.out.println("Processing main board:  Row " + rowindex + " Col " + colindex + " Queens "
-                            + numQueens);
+                    System.out.println("Processing main board:  Row " + rowindex + " Col " + colindex);
                 }
 
                 // Make a copy of the current board
@@ -180,8 +189,8 @@ public class QueensQuandry
                 // Try to place the queen. If we could, iterate and try to place the next one
                 if (curBoard.placeQueen(rowindex, colindex))
                 {
-                    // The maximum number can't be more than the board size since two queens cannot be in the same
-                    // column or row
+                    // See if we have a solution, and save if we do. Also say we're done since we are not caring about
+                    // any particular final solutions right now.
                     if (curBoard.numQueens() == BOARD_SIZE)
                     {
                         finalboard = new QueensQuandry(curBoard);
@@ -201,6 +210,7 @@ public class QueensQuandry
         QueensQuandry.finalboard = new QueensQuandry();
         mainBoard.iterate();
 
+        // Print out the final solution
         System.out.println("Final solution:");
         System.out.println(finalboard.numQueens());
         finalboard.printBoard();
