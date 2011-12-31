@@ -3,6 +3,10 @@ package pxc.util.polyominos;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * This class represents a polyomino of arbitrary size. It supports the ability to flip and rotate the polyomino and
+ * place on a borad.
+ */
 public class Polyomino
 {
     private static final char BLANK            = '.';
@@ -11,7 +15,7 @@ public class Polyomino
     private Shape             shape;
     private Shape             orig_shape;
     private ArrayList<Shape>  all_orientations = new ArrayList<Shape>();
-    
+
     private boolean           doflip           = false;
     private boolean           dorotate         = false;
     private boolean           lastCollision    = false;
@@ -34,6 +38,16 @@ public class Polyomino
         this(symbol, shape, numrows, numcols, Orientation.normal, dorotate, doflip);
     }
 
+    /**
+     * 
+     * @param symbol
+     * @param shape
+     * @param numrows
+     * @param numcols
+     * @param direction
+     * @param dorotate
+     * @param doflip
+     */
     public Polyomino(char symbol, String shape, int numrows, int numcols, Orientation direction, boolean dorotate,
             boolean doflip)
     {
