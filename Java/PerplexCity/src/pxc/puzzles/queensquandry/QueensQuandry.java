@@ -6,10 +6,10 @@ public class QueensQuandry {
 	public static void main(String[] args) {
 		Board InitBoard = new Board();
 		
-		InitBoard.Iterate();
+		InitBoard.iterate();
 		
-		System.out.println(g_FinalBoard.NumQueens());
-		g_FinalBoard.Print();	
+		System.out.println(g_FinalBoard.numQueens());
+		g_FinalBoard.printBoard();	
 		System.out.println();
 
 	}
