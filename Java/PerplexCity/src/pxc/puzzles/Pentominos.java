@@ -8,7 +8,6 @@ import pxc.util.polyominos.Polyomino.Orientation;
 
 public class Pentominos
 {
-
     private static final int                  BOARD_ROWS = 5;
     private static final int                  BOARD_COLS = 12;
 
@@ -73,7 +72,6 @@ public class Pentominos
 
     public static void main(String[] args) throws CloneNotSupportedException
     {
-
         // Initialize the pentominos. I is special so don't add to the collection.
         Polyomino i_pentomino = new Polyomino('i', "xxxxx", 1, 5, true, true);
         pentominos.put("x", new Polyomino('x', ".x.xxx.x.", 3, 3, true, true));
