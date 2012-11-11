@@ -1,9 +1,0 @@
-<project name="deploy" default = "fadownloader" basedir="">
-	
-	<property name="wsdir" location="C:\Users\Scott\git\Web Scrapers\Greasemonkey\scripts" />
-	<property name="gsdir" location="C:\Users\Scott\AppData\Roaming\Mozilla\Firefox\Profiles\y811xjxu.default\gm_scripts\FA_Submissions_New_Conglomorator" />
-
-	<target name="fadownloader">
-		<copy file="${wsdir}/fa_downloader_new.user.js" todir="${gsdir}" />
-	</target>
-</project>
