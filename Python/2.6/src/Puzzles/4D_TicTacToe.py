@@ -1,14 +1,14 @@
-import sys
-from copy import deepcopy
 import numpy
 import os
+import sys
 
-# 2,2,0,2
+# Coords are (ROW, COL, row, col) or (z, row, col)
 
 EMPTY = '.'
 X = 'x'
 O = 'o'
 BOARD_SIZE = 5
+INVALID = -1
 
 def notPlayer(player):
     if (player == X):
@@ -16,7 +16,7 @@ def notPlayer(player):
     else:
         return X
         
-def printBoard2D(board):
+def printSquare(board):
     for i in range(0, BOARD_SIZE):
         for j in range(0, BOARD_SIZE):
             print(board[i][j]),
@@ -24,59 +24,14 @@ def printBoard2D(board):
     print('')
 
 def printBoard4D(board):
-    for i in range(0, BOARD_SIZE):
-        print('Row {0} ---------------'.format(i + 1))
-                
-        for j in range(0, BOARD_SIZE):
-            printBoard2D(board[i][j])
-    print('')
-
-
-def checkSet(mySet, playerChar):
-    ret_val = -1
-    
-    if (mySet.count(playerChar) == (BOARD_SIZE - 1) and mySet.count(EMPTY) == 1):
-        ret_val = mySet.index(EMPTY)
-
-    return ret_val
-
-def checkBoard2D(board, playerChar):
-    global hasNextMove
-    global foundLocation
-    
-    otherPlayerChar = notPlayer(playerChar)
-    newBoard = deepcopy(board)
-    lookupBoard = numpy.array(board)
-    
-    # Rows
-    for i in range(0, BOARD_SIZE):
-        foundIndex = checkSet(lookupBoard[i, :].tolist(), otherPlayerChar) 
-        if (foundIndex >= 0):
-            hasNextMove = True
-            foundLocation = (i, foundIndex)
-            newBoard[i][foundIndex] = playerChar
-
-    # Cols
-        foundIndex = checkSet(lookupBoard[:, i].tolist(), otherPlayerChar) 
-        if (foundIndex >= 0):
-            hasNextMove = True
-            foundLocation = (foundIndex, i)
-            newBoard[foundIndex][i] = playerChar
-    
-    # Diagonals
-    foundIndex = checkSet(numpy.diagonal(lookupBoard).tolist(), otherPlayerChar) 
-    if (foundIndex >= 0):
-        hasNextMove = True
-        foundLocation = (foundIndex, foundIndex)
-        newBoard[foundIndex][foundIndex] = playerChar
-        
-    foundIndex = checkSet(numpy.diagonal(lookupBoard[::-1]).tolist(), otherPlayerChar) 
-    if (foundIndex >= 0):
-        hasNextMove = True
-        foundLocation = (BOARD_SIZE - foundIndex - 1, foundIndex)
-        newBoard[BOARD_SIZE - foundIndex - 1][foundIndex] = playerChar
-                        
-    return newBoard
+    for bigRow in range(0, BOARD_SIZE):
+        for row in range(0, BOARD_SIZE):
+            for bigCol in range(0, BOARD_SIZE):
+                for col in range(0, BOARD_SIZE):
+                    sys.stdout.write(board[bigRow][bigCol][row][col])
+                sys.stdout.write('|')
+            print('')
+        print('-' * (pow(BOARD_SIZE, 2) + BOARD_SIZE))
 
 def initBoard():
     f_in = open(os.getcwd() + '\\4dBoard.txt', 'r') 
@@ -109,254 +64,188 @@ def initBoard():
     f_in.close()
     return bigBoard
 
+def checkSet(mySet, playerChar):
+    ret_val = INVALID
+    
+    if (mySet.count(playerChar) == (BOARD_SIZE - 1) and mySet.count(EMPTY) == 1):
+        ret_val = mySet.index(EMPTY)
+
+    return ret_val
+
+def checkSquare(board, playerChar):
+    otherPlayerChar = notPlayer(playerChar)
+    lookupBoard = numpy.array(board)
+    foundLocation = (INVALID, INVALID)
+    
+    # Rows and cols
+    for i in range(0, BOARD_SIZE):
+        #print("        Processing square index " + str(i))
+        rowSet = lookupBoard[i, :].tolist()
+        foundIndex = checkSet(rowSet, otherPlayerChar)
+        if (foundIndex != INVALID):
+            foundLocation = (i, foundIndex)
+        
+        colSet = lookupBoard[:, i].tolist()
+        foundIndex = checkSet(colSet, otherPlayerChar)
+        if (foundIndex >= 0):
+            foundLocation = (foundIndex, i)
+
+    # Diagonals
+    foundIndex = checkSet(numpy.diagonal(lookupBoard).tolist(), otherPlayerChar) 
+    if (foundIndex != INVALID):
+        foundLocation = (foundIndex, foundIndex)
+        
+    foundIndex = checkSet(numpy.diagonal(lookupBoard[::-1]).tolist(), otherPlayerChar) 
+    if (foundIndex != INVALID):
+        revFoundIndex = BOARD_SIZE - foundIndex - 1
+        foundLocation = (revFoundIndex, foundIndex)
+                        
+    #print(foundLocation)
+    return foundLocation
+
+def checkCube(board, playerChar):
+    lookupBoard = numpy.array(board)
+    foundLocation = (INVALID, INVALID, INVALID)
+    diag = []
+    adiag = []
+    bdiag = []
+    cdiag = []
+    
+    # Slices
+    for i in range(0, BOARD_SIZE):
+        #print("    Processing cube index " + str(i))
+        #print("        Processing z slice...")
+        zSlice = lookupBoard[i, :, :].tolist()
+        result = checkSquare(zSlice, playerChar)
+        if (result[0] != INVALID):
+            foundRow = result[0]
+            foundCol = result[1]
+            foundLocation = (i, foundCol, foundRow)
+            
+        rowSlice = lookupBoard[:, i, :].tolist()
+        #print("        Processing row slice...")
+        result = checkSquare(rowSlice, playerChar)
+        if (result[0] != INVALID):
+            foundRow = result[0]
+            foundCol = result[1]
+            foundLocation = (foundRow , i, foundCol)
+        
+        colSlice = lookupBoard[:, :, i].tolist()
+        #print("        Processing col slice...")
+        result = checkSquare(colSlice, playerChar)
+        if (result[0] != INVALID):
+            foundRow = result[0]
+            foundCol = result[1]
+            foundLocation = (foundRow , foundCol, i)
+
+        # Add to diagonals
+        antiI = BOARD_SIZE - i - 1
+        diag.append(board[i][i][i])
+        adiag.append(board[i][antiI][i])
+        bdiag.append(board[i][i][antiI])
+        cdiag.append(board[i][antiI][antiI])
+
+    # Check the diagonals
+    #print("    Processing diag 1...")
+    otherPlayerChar = notPlayer(playerChar)
+    foundIndex = checkSet(diag, otherPlayerChar)
+    if (foundIndex != INVALID):
+        foundLocation = (foundIndex, foundIndex, foundIndex)
+
+    #print("    Processing diag 2...")
+    foundIndex = checkSet(adiag, otherPlayerChar)
+    if (foundIndex != INVALID):
+        foundLocation = (foundIndex, BOARD_SIZE - foundIndex - 1, foundIndex)
+        
+    #print("    Processing diag 3...")
+    foundIndex = checkSet(bdiag, otherPlayerChar)
+    if (foundIndex != INVALID):
+        foundLocation = (foundIndex, foundIndex, BOARD_SIZE - foundIndex - 1)
+                
+    #print("    Processing diag 4...")
+    foundIndex = checkSet(cdiag, playerChar)
+    if (foundIndex != INVALID):
+        foundLocation = (foundIndex, BOARD_SIZE - foundIndex - 1 , BOARD_SIZE - foundIndex - 1)  
+                                  
+    #print(foundLocation)
+    return foundLocation
+
 # Main --------------------------------------------------------
 curBoard = initBoard()
 curPlayer = O
 hasNextMove = True
-foundLocation = ()
+iteration = 0
 
 while hasNextMove:
-    possibleMoves = 0
-    
-    # Check within each small board
-    print("---- 2D Squares ----")
-    for bigRowIndex in range(0, BOARD_SIZE):
-        for bigColIndex in range(0, BOARD_SIZE):
-            hasNextMove = False
-            newBoard = checkBoard2D(curBoard[bigRowIndex][bigColIndex], curPlayer)
-    
-            # If possible move, make the found location 4D and update the board
-            if hasNextMove:
-                possibleMoves = possibleMoves + 1
-                foundLocation = (bigRowIndex, bigColIndex, foundLocation(0), foundLocation(1))
-                curBoard[bigRowIndex][bigColIndex] = newBoard
-                
-    # Check all 3D vertical cubes
-    print("---- 3D Vertical Cubes ----")
-    for bigColIndex in range(0, BOARD_SIZE):
-        diagBoard = []
-        altDiagBoard = []
+    foundLocation = (INVALID, INVALID, INVALID, INVALID)
+    diagCube = []
+    altDiagCube = []
+            
+    print("Iteration {0}, player {1}".format(str(iteration), curPlayer))
+    for i in range(0, BOARD_SIZE):
+        lookupBoard = numpy.array(curBoard)
         
-        for smallIndex in range (0, BOARD_SIZE):
-            hasNextMove = False
-            horizBoard = []
-            vertBoard = []
-            
-            # Construct small boards from horizontal and vertical slices
-            for bigRowIndex in range(0, BOARD_SIZE):
-                tmpBoard = numpy.array(curBoard[bigRowIndex][bigColIndex])
-                horizBoard.append(tmpBoard[smallIndex, :].tolist())
-                vertBoard.append(tmpBoard[:, smallIndex].tolist())
+        #print("Processing hypercube index " + str(i))
+        rowCube = lookupBoard[i, :, :, :]
+        result = checkCube(rowCube, curPlayer)
+        if (result[0] != INVALID):
+            foundRow = result[1]
+            foundCol = result[2]
+            foundZ = result[0]
+            foundLocation = (i, foundZ, foundRow, foundCol)
         
-            # Check the vertical boards
-            hasNextMove = False
-            newBoard = checkBoard2D(vertBoard, curPlayer)
+        colCube = lookupBoard[:, i, :, :]
+        result = checkCube(colCube, curPlayer)
+        if (result[0] != INVALID):
+            foundRow = result[1]
+            foundCol = result[2]
+            foundZ = result[0]
+            foundLocation = (foundZ, i, foundRow, foundCol)
+                    
+        # Add to diagonals
+        revIndex = BOARD_SIZE - i - 1
+        diagCube.append(curBoard[i][i])
+        altDiagCube.append(curBoard[i][revIndex])
     
-            # If possible move, make the found location 4D and update the board
-            if hasNextMove:
-                possibleMoves = possibleMoves + 1
-                foundLocation = (foundLocation(0), bigColIndex, foundLocation(1), smallIndex)
-                curBoard[bigRowIndex][bigColIndex] = newBoard
-                
-            # Check the horizontal boards
-            hasNextMove = False
-            newBoard = checkBoard2D(horizBoard, curPlayer)
+    # Check diagonals
+    #print("Processing 4D diagonal 1...")
+    result = checkCube(diagCube, curPlayer)
+    if (result[0] != INVALID):
+        foundRow = result[1]
+        foundCol = result[2]
+        foundZ = result[0]
+        foundLocation = (foundZ, foundZ, foundRow, foundCol)
     
-            # If possible move, make the found location 4D and update the board
-            if hasNextMove:
-                possibleMoves = possibleMoves + 1
-                foundLocation = (foundLocation(0), bigColIndex, foundLocation(1), smallIndex)
-                curBoard[bigRowIndex][bigColIndex] = newBoard
-                
-            # Add to cube diagonal boards
-            diagBoard.append(curBoard[smallIndex][bigColIndex][smallIndex][smallIndex])
-            altDiagBoard.append(curBoard[smallIndex][bigColIndex][smallIndex][BOARD_SIZE - smallIndex - 1])
-            
-        # Check cube diagonals
-        foundIndex = checkSet(diagBoard, notPlayer(curPlayer)) 
-        if (foundIndex >= 0):
-            hasNextMove = True
-            foundLocation = (foundIndex, foundIndex)
-            curBoard[foundIndex][bigColIndex][foundIndex][foundIndex] = curPlayer
-            
-        foundIndex = checkSet(altDiagBoard, notPlayer(curPlayer)) 
-        if (foundIndex >= 0):
-            hasNextMove = True
-            foundLocation = (BOARD_SIZE - foundIndex - 1, foundIndex)
-            curBoard[foundIndex][bigColIndex][BOARD_SIZE - foundIndex - 1][foundIndex] = curPlayer
-            
-    # Check all 3D horizontal cubes
-    print("---- 3D Horizontal Cubes ----")
-    for bigRowIndex in range(0, BOARD_SIZE):
-        diagBoard = []
-        altDiagBoard = []
+    #print("Processing 4D diagonal 2...")
+    result = checkCube(altDiagCube, curPlayer)
+    if (result[0] != INVALID):
+        foundRow = result[1]
+        foundCol = result[2]
+        foundZ = result[0]
+        foundLocation = (foundZ, BOARD_SIZE - foundZ - 1, foundRow, foundCol)
         
-        for smallIndex in range (0, BOARD_SIZE):
-            hasNextMove = False
-            horizBoard = []
-            vertBoard = []
-            
-            # Construct small boards from horizontal and vertical slices
-            for bigColIndex in range(0, BOARD_SIZE):
-                tmpBoard = numpy.array(curBoard[bigRowIndex][bigColIndex])
-                horizBoard.append(tmpBoard[smallIndex, :].tolist())
-                vertBoard.append(tmpBoard[:, smallIndex].tolist())
-        
-            # Check the vertical boards
-            hasNextMove = False
-            newBoard = checkBoard2D(vertBoard, curPlayer)
-    
-            # If possible move, make the found location 4D and update the board
-            if hasNextMove:
-                possibleMoves = possibleMoves + 1
-                foundLocation = (foundLocation(0), bigColIndex, foundLocation(1), smallIndex)
-                curBoard[bigRowIndex][bigColIndex] = newBoard
-                
-            # Check the horizontal boards
-            hasNextMove = False
-            newBoard = checkBoard2D(horizBoard, curPlayer)
-    
-            # If possible move, make the found location 4D and update the board
-            if hasNextMove:
-                possibleMoves = possibleMoves + 1
-                foundLocation = (foundLocation(0), bigColIndex, foundLocation(1), smallIndex)
-                curBoard[bigRowIndex][bigColIndex] = newBoard
-                
-            # Add to cube diagonal boards
-            diagBoard.append(curBoard[bigRowIndex][smallIndex][smallIndex][smallIndex])
-            altDiagBoard.append(curBoard[bigRowIndex][smallIndex][smallIndex][BOARD_SIZE - smallIndex - 1])
-            
-        # Check cube diagonals
-        foundIndex = checkSet(diagBoard, notPlayer(curPlayer)) 
-        if (foundIndex >= 0):
-            hasNextMove = True
-            foundLocation = (foundIndex, foundIndex)
-            curBoard[foundIndex][bigColIndex][foundIndex][foundIndex] = curPlayer
-            
-        foundIndex = checkSet(altDiagBoard, notPlayer(curPlayer)) 
-        if (foundIndex >= 0):
-            hasNextMove = True
-            foundLocation = (BOARD_SIZE - foundIndex - 1, foundIndex)
-            curBoard[foundIndex][bigColIndex][BOARD_SIZE - foundIndex - 1][foundIndex] = curPlayer   
-                                 
-    # Check the 3D diagonal cubes
-    print("---- 3D Main Diagonal Cubs ----")
-    diagBoard = []
-    altDiagBoard = []
-    
-    for smallIndex in range (0, BOARD_SIZE):
-        hasNextMove = False
-        horizBoard = []
-        vertBoard = []
-        
-        # Construct small boards from horizontal and vertical slices
-        for bigIndex in range(0, BOARD_SIZE):
-            tmpBoard = numpy.array(curBoard[bigIndex][bigIndex])
-            horizBoard.append(tmpBoard[smallIndex, :].tolist())
-            vertBoard.append(tmpBoard[:, smallIndex].tolist())
-    
-        # Check the vertical boards
-        hasNextMove = False
-        newBoard = checkBoard2D(vertBoard, curPlayer)
-
-        # If possible move, make the found location 4D and update the board
-        if hasNextMove:
-            possibleMoves = possibleMoves + 1
-            foundLocation = (foundLocation(0), bigIndex, foundLocation(1), smallIndex)
-            curBoard[bigIndex][bigIndex] = newBoard
-            
-        # Check the horizontal boards
-        hasNextMove = False
-        newBoard = checkBoard2D(horizBoard, curPlayer)
-
-        # If possible move, make the found location 4D and update the board
-        if hasNextMove:
-            possibleMoves = possibleMoves + 1
-            foundLocation = (foundLocation(0), bigIndex, foundLocation(1), smallIndex)
-            curBoard[bigIndex][bigIndex] = newBoard
-            
-        # Add to cube diagonal boards
-        diagBoard.append(curBoard[bigIndex][smallIndex][smallIndex][smallIndex])
-        altDiagBoard.append(curBoard[bigIndex][smallIndex][smallIndex][BOARD_SIZE - smallIndex - 1])
-        
-    # Check cube diagonals
-    foundIndex = checkSet(diagBoard, notPlayer(curPlayer)) 
-    if (foundIndex >= 0):
-        hasNextMove = True
-        foundLocation = (foundIndex, foundIndex)
-        curBoard[foundIndex][bigIndex][foundIndex][foundIndex] = curPlayer
-        
-    foundIndex = checkSet(altDiagBoard, notPlayer(curPlayer)) 
-    if (foundIndex >= 0):
-        hasNextMove = True
-        foundLocation = (BOARD_SIZE - foundIndex - 1, foundIndex)
-        curBoard[foundIndex][bigIndex][BOARD_SIZE - foundIndex - 1][foundIndex] = curPlayer 
- 
-    print("---- 3D Alternate Diagonal Cubs ----")
-    diagBoard = []
-    altDiagBoard = []
-    
-    for smallIndex in range (0, BOARD_SIZE):
-        hasNextMove = False
-        horizBoard = []
-        vertBoard = []
-        
-        # Construct small boards from horizontal and vertical slices
-        for bigIndex in range(0, BOARD_SIZE):
-            tmpBoard = numpy.array(curBoard[bigIndex][BOARD_SIZE - bigIndex - 1])
-            horizBoard.append(tmpBoard[smallIndex, :].tolist())
-            vertBoard.append(tmpBoard[:, smallIndex].tolist())
-    
-        # Check the vertical boards
-        hasNextMove = False
-        newBoard = checkBoard2D(vertBoard, curPlayer)
-
-        # If possible move, make the found location 4D and update the board
-        if hasNextMove:
-            possibleMoves = possibleMoves + 1
-            foundLocation = (foundLocation(0), v, foundLocation(1), smallIndex)
-            curBoard[bigIndex][BOARD_SIZE - bigIndex - 1] = newBoard
-            
-        # Check the horizontal boards
-        hasNextMove = False
-        newBoard = checkBoard2D(horizBoard, curPlayer)
-
-        # If possible move, make the found location 4D and update the board
-        if hasNextMove:
-            possibleMoves = possibleMoves + 1
-            foundLocation = (foundLocation(0), BOARD_SIZE - foundLocation(0) - 1, foundLocation(1), smallIndex)
-            curBoard[bigIndex][BOARD_SIZE - bigIndex - 1] = newBoard
-            
-        # Add to cube diagonal boards
-        diagBoard.append(curBoard[bigIndex][smallIndex][smallIndex][smallIndex])
-        altDiagBoard.append(curBoard[bigIndex][smallIndex][smallIndex][BOARD_SIZE - smallIndex - 1])
-        
-    # Check cube diagonals
-    foundIndex = checkSet(diagBoard, notPlayer(curPlayer)) 
-    if (foundIndex >= 0):
-        hasNextMove = True
-        foundLocation = (foundIndex, foundIndex)
-        curBoard[foundIndex][BOARD_SIZE - bigIndex - 1][foundIndex][foundIndex] = curPlayer
-        
-    foundIndex = checkSet(altDiagBoard, notPlayer(curPlayer)) 
-    if (foundIndex >= 0):
-        hasNextMove = True
-        foundLocation = (BOARD_SIZE - foundIndex - 1, foundIndex)
-        curBoard[foundIndex][BOARD_SIZE - bigIndex - 1][BOARD_SIZE - foundIndex - 1][foundIndex] = curPlayer 
-                          
     # We only want to proceed if there was at least one possible move
     hasNextMove = False
-    if (possibleMoves == 0):
-        print('No possible moves left')
-        
-    if (possibleMoves == 1):
-        print('Played location was ' + str(foundLocation))
-        printBoard4D(newBoard)
-        
-        curBoard = newBoard
+    if (foundLocation[0] == INVALID):
+        print('No possible moves left')     
+    else:
+        print('Played location was ' + str(foundLocation) + ' by ' + curPlayer)
+        curBoard[foundLocation[0]][foundLocation[1]][foundLocation[2]][foundLocation[3]] = curPlayer
         hasNextMove = True
-        
-    if (possibleMoves > 1):
-        print ('More than one possible move, cannot continue.')
-        
+        #printBoard4D(curBoard)
+
     curPlayer = notPlayer(curPlayer)
+    iteration = iteration + 1
+    
+print("DONE!")
+
+#===============================================================================
+# O    (2, 2)    (2, 0)
+# X    (0, 0)    (4, 0)
+# O    (2, 0)    (4, 0)
+# X    (2, 1)    (4, 1)
+# O    (3, 1)    (4, 1)
+# X    (3, 3)    (4, 1)
+# O    (2, 2)    (4, 1)
+# X    (4, 2)    (4, 1)
+#===============================================================================
