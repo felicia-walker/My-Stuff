@@ -1,4 +1,4 @@
-# My Little Pony: Friendship Is Magic save file transfer util
+# My Little Pony: Friendship Is Magic save file transfer utility
 #
 # This program will decrypt an MLP save from one device and encrypt it for use on another device.
 # You will need the GLUIDs from both devices and some means of transferring files to them.
@@ -7,6 +7,11 @@
 #
 # See http://roundcube3.blogspot.com/2012/11/reverse-engineering-with-ponies.html for details.
 # This is also the source I obtained the info needed to write this program.
+#
+# To use:
+# 1. Install the XXTEA library from https://pypi.python.org/pypi/xxtea
+# 2. Enter the filenames and GLUIDs (remove the spaces) to use below
+# 3. Run the program
 
 import struct, xxtea
 
@@ -14,9 +19,9 @@ WORD_SIZE = 4
 
 file_old = open("C:\mlp_save.dat", "rb")
 file_new = open("C:\mlp_save_new.dat", "wb")
-gluid_old = "1ee4688454e7a830e44491c86a1140fc137b6c204d60742c5cdb0bb1e8eb0465453aaa43"
+gluid = "1ee4688454e7a830e44491c86a1140fc137b6c204d60742c5cdb0bb1e8eb0465453aaa43"
 gluid_new = "3c7675febad2a6448446f083cb4a837f7d52d3fdabf16a38afeed478865b17db128669a6"
-gluid_hex_old = gluid_old.decode("hex")
+gluid_hex = gluid.decode("hex")
 gluid_hex_new = gluid_new.decode("hex")
 
 try:
@@ -31,7 +36,7 @@ encry_size = data[2 * WORD_SIZE:3 * WORD_SIZE]
 encry_data = data[3 * WORD_SIZE:data_size - WORD_SIZE]
 reserved = data[data_size - WORD_SIZE:len(data)]
 
-decry_data = xxtea.decrypt(encry_data, gluid_hex_old, False)
+decry_data = xxtea.decrypt(encry_data, gluid_hex, False)
 new_encry_data = xxtea.encrypt(decry_data, gluid_hex_new, False)
 
 try:
