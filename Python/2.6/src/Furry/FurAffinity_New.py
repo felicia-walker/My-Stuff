@@ -16,7 +16,7 @@ urllib2.install_opener(opener)
 
 # Log in using POST data captured with LiveHeaders
 try:
-    params = 'action=login&retard_protection=1&name=volvox&pass=tanuki36FA&login=Login+to%C2%A0FurAffinity'
+    params = 'action=login&retard_protection=1&name=xxx&pass=xxx&login=Login+to%C2%A0FurAffinity'
     urllib2.urlopen(BASE_URL + '/login/', params)
 except ValueError:
     print "Could not log in"
