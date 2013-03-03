@@ -10,7 +10,7 @@ urllib2.install_opener(opener)
 
 # Log in using POST data captured with LiveHeaders
 try:
-    params = 'action=login&retard_protection=1&name=volvox&pass=tanuki36FA&login=Login+to%C2%A0FurAffinity'
+    params = 'action=login&retard_protection=1&name=xxx&pass=xxx&login=Login+to%C2%A0FurAffinity'
     o = opener.open('https://www.furaffinity.net/login/', params)
     data = o.read()
 except ValueError:
