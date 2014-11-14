@@ -1,0 +1,64 @@
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+	margin: 0;
+	font-family: Arial;
+	font-size: 12px;
+}
+
+.button {
+	padding: 5px 10px 5px 10px;
+	border: 1px solid black;
+	margin: 10px;
+	text-align: center;
+}
+
+.centered {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.sectionLabel {
+	font-size: 24px;
+}
+
+div#cipherPane {
+	clear: left;
+	width: 99%;
+}
+
+.cipherTitle {
+	font-weight: bold;
+	font-size: 14px;
+	padding-bottom: 5px;
+}
+
+.cipher {
+	border: 1px solid black;
+	margin: 2px;
+	padding: 5px;
+	width: 48%;
+}
+
+.messagePane {
+	float: left;
+	width: 49%;
+	height: 500px;
+}
+
+.message {
+	height: 40%;
+	width: 90%;
+	border: 1px solid black;
+	margin: 10px;
+	font-family: "Courier New", Courier, monospace
+	font-size: 12px;
+}
+
+.analysisPane {
+	margin: 20px;
+}

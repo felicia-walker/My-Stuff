@@ -1,0 +1,38 @@
+<html>
+<head>
+	<title>Classical Cipher Time</title>
+	<script src="common.js"></script>
+	<script src="messages.js"></script>
+	<script src="ciphers.js"></script>
+	<script src="frequency_analysis.js"></script>
+	<script src="ui.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="main.css" />
+</head>
+
+<body>
+	<div id="mainPane">
+		<div id="cipherPane">
+			<div id="caeserShift" class="cipher">
+				<div class="cipherTitle">Caeser Shift</div>
+				<span>Key: </span>
+				<input id="caeserShift_key" type="text" value="0"/>
+			</div>
+		</div>
+		<div id="plaintext" class="messagePane"></div>
+		<div id="ciphertext" class="messagePane"></div>
+	</div>
+</body>
+
+<script type="text/javascript">
+	createSection("Plaintext");
+	createMessageButton("plaintext", "Encrypt", encrypt);
+	createMessageButton("plaintext", "Analyze", doAnalysis);
+	createMessageButton("plaintext", "Manipulate", null);
+
+	createSection("Ciphertext");
+	createMessageButton("ciphertext", "Decrypt", decrypt);
+	createMessageButton("ciphertext", "Analyze", doAnalysis);
+	createMessageButton("ciphertext", "Manipulate", null);
+</script>
+</html>

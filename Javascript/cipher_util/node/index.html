@@ -1,0 +1,106 @@
+<html>
+<head>
+	<title>Classical Cipher Time</title>
+	<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="main.css" />
+</head>
+
+<body>
+	<div id="mainPane">
+		<div id="cipherPane">
+			<div id="caeserShift" class="cipher">
+				<div class="cipherTitle">Caeser Shift</div>
+				<span>Key: </span>
+				<input id="caeserShift_key" type="text" value="0"/>
+			</div>
+		</div>
+		<div id="plaintext" class="messagePane"></div>
+		<div id="ciphertext" class="messagePane"></div>
+	</div>
+</body>
+
+<script type="text/javascript">
+function createSection(paneName) {
+	var paneId = paneName.toLowerCase();
+	
+	var label = document.createElement("div");
+	label.className = "centered sectionLabel";
+	label.appendChild(document.createTextNode(paneName));
+	
+	var messageArea = document.createElement("textarea");
+	messageArea.className = "message";
+	messageArea.id = paneId + "_message";
+	var message = document.createElement("div");
+	message.className = "centered";
+	message.appendChild(messageArea);
+
+	var buttons = document.createElement("div");
+	buttons.id = paneId + "_buttons";
+	buttons.className = "centered";
+	
+	var analysis = document.createElement("div");
+	analysis.id = paneId + "_analysis";
+	analysis.className = "analysisPane";
+	//var left = document.createElement("div");
+	//left.id = paneId + "_analysis_left";
+		
+	var section = document.getElementById(paneId);
+	section.appendChild(label);
+	section.appendChild(message);
+	section.appendChild(buttons);
+	section.appendChild(analysis);
+}
+
+function createMessageButton(paneId, text, action) {
+	var section = document.getElementById(paneId + "_buttons");
+	var message = document.getElementById(paneId + "_message");
+
+	var button = document.createElement("span");
+	button.id = paneId + "_button_" + text.toLowerCase();
+	button.className = "button";
+	button.appendChild(document.createTextNode(text));
+	button.onclick = function(){action(message.value, paneId);};
+	
+	section.appendChild(button);
+}
+
+function encrypt(text) {
+	var cipher = new CaeserShift(document.getElementById("caeserShift_key").value);
+	var message = new Message(text);
+	var cipherText = cipher.encrypt(message);
+	
+	document.getElementById("ciphertext_message").value = cipherText;
+}
+
+function decrypt(text) {
+	var cipher = new CaeserShift(document.getElementById("caeserShift_key").value);
+	var message = new Message(text);
+	var plainText = cipher.decrypt(message);
+	
+	document.getElementById("plaintext_message").value = plainText;
+}
+
+function doAnalysis(text, paneId) {
+	$.ajax({
+		url: "http://localhost:8080/analyze?text=" + text,
+		success: function(result) {
+			var analysis = document.getElementById(paneId + "_analysis");
+			analysis.appendChild(document.createTextNode(result));
+		},
+		error: function(result) {
+			alert("Error!");
+		}
+	});
+}
+
+createSection("Plaintext");
+createMessageButton("plaintext", "Encrypt", encrypt);
+createMessageButton("plaintext", "Analyze", doAnalysis);
+createMessageButton("plaintext", "Manipulate", null);
+
+createSection("Ciphertext");
+createMessageButton("ciphertext", "Decrypt", decrypt);
+createMessageButton("ciphertext", "Analyze", doAnalysis);
+createMessageButton("ciphertext", "Manipulate", null);
+</script>
+</html>
